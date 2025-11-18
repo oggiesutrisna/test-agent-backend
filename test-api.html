@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API - Agent Backend</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        .endpoint {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+        }
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .method {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+        .get { background: #28a745; color: white; }
+        .post { background: #007bff; color: white; }
+        .url {
+            font-family: 'Courier New', monospace;
+            color: #333;
+            font-size: 0.9em;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .response {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .response pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 0.85em;
+        }
+        .success { border-left: 4px solid #28a745; }
+        .error { border-left: 4px solid #dc3545; }
+        .loading {
+            color: #667eea;
+            font-style: italic;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+        .status-ok { background: #28a745; color: white; }
+        .status-error { background: #dc3545; color: white; }
+        .social-links {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e7f3ff;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .social-links h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .social-link {
+            display: block;
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #007bff;
+            word-break: break-all;
+        }
+        .social-link:hover {
+            background: #f0f0f0;
+        }
+        .social-link:before {
+            content: "🔗 ";
+        }
+        .social-link.twitter:before {
+            content: "🐦 Twitter: ";
+        }
+        .social-link.linkedin:before {
+            content: "💼 LinkedIn: ";
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏨 Agent Backend API Tester</h1>
+        <p class="subtitle">Test semua endpoint API dengan mudah</p>
+
+        <!-- Health Check -->
+        <div class="section">
+            <h2>Health Check</h2>
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/health</span>
+                    <button onclick="testHealth()">Test</button>
+                    <span id="health-status"></span>
+                </div>
+                <div id="health-response" class="response" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Posts -->
+        <div class="section">
+            <h2>Posts</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/posts</span>
+                    <button onclick="testGetPosts()">Get All Posts</button>
+                </div>
+                <div id="posts-response" class="response" style="display:none;"></div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="url">/api/posts/create</span>
+                    <button onclick="testCreatePost()">Create Post</button>
+                </div>
+                <div id="create-post-response" class="response" style="display:none;"></div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/posts/:id/social-media</span>
+                    <button onclick="testGetSocialMedia()">Get Social Media Links</button>
+                </div>
+                <label>
+                    Post ID:
+                    <input type="text" id="post-id" placeholder="Enter post ID" />
+                </label>
+                <div id="social-media-response" class="response" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Hotels -->
+        <div class="section">
+            <h2>Hotels</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/hotels</span>
+                    <button onclick="testGetHotels()">Get All Hotels</button>
+                </div>
+                <div id="hotels-response" class="response" style="display:none;"></div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="url">/api/hotels/scrape</span>
+                    <button onclick="testScrapeHotel()">Scrape Hotel</button>
+                </div>
+                <label>
+                    Hotel URL (Expedia):
+                    <input type="text" id="hotel-url" placeholder="https://www.expedia.com/hotel/..." />
+                </label>
+                <div id="scrape-response" class="response" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Chatbot -->
+        <div class="section">
+            <h2>Chatbot</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="url">/api/chat</span>
+                    <button onclick="testChat()">Send Message</button>
+                </div>
+                <label>
+                    Message:
+                    <input type="text" id="chat-message" placeholder="Recommend a hotel" value="Recommend a hotel" />
+                </label>
+                <div id="chat-response" class="response" style="display:none;"></div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/chat/recommendations</span>
+                    <button onclick="testRecommendations()">Get Recommendations</button>
+                </div>
+                <div id="recommendations-response" class="response" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000';
+
+        async function makeRequest(method, endpoint, body = null) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, options);
+                const data = await response.json();
+                return {
+                    status: response.status,
+                    ok: response.ok,
+                    data
+                };
+            } catch (error) {
+                return {
+                    status: 0,
+                    ok: false,
+                    error: error.message
+                };
+            }
+        }
+
+        function showResponse(elementId, result, showSocialLinks = false) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            
+            if (result.error) {
+                element.className = 'response error';
+                element.innerHTML = `<pre>Error: ${result.error}</pre>`;
+            } else if (result.ok) {
+                element.className = 'response success';
+                let html = `<pre>Status: ${result.status}\n\n${JSON.stringify(result.data, null, 2)}</pre>`;
+                
+                // Show social media links prominently if available
+                if (showSocialLinks && result.data) {
+                    const data = result.data;
+                    const socialLinks = data.socialMediaLinks || (data.socialMediaPosts ? extractSocialLinks(data.socialMediaPosts) : null);
+                    
+                    if (socialLinks && (socialLinks.twitter || socialLinks.linkedin)) {
+                        html += `<div class="social-links">
+                            <h4>📱 Social Media Shared Post Links:</h4>`;
+                        if (socialLinks.twitter) {
+                            html += `<a href="${socialLinks.twitter}" target="_blank" class="social-link twitter">${socialLinks.twitter}</a>`;
+                        }
+                        if (socialLinks.linkedin) {
+                            html += `<a href="${socialLinks.linkedin}" target="_blank" class="social-link linkedin">${socialLinks.linkedin}</a>`;
+                        }
+                        if (!socialLinks.twitter && !socialLinks.linkedin) {
+                            html += `<p style="color: #666;">No social media links available yet. Make sure social media credentials are configured.</p>`;
+                        }
+                        html += `</div>`;
+                    }
+                }
+                
+                element.innerHTML = html;
+            } else {
+                element.className = 'response error';
+                element.innerHTML = `<pre>Status: ${result.status}\n\n${JSON.stringify(result.data, null, 2)}</pre>`;
+            }
+        }
+
+        function extractSocialLinks(socialMediaPosts) {
+            const links = { twitter: null, linkedin: null };
+            if (Array.isArray(socialMediaPosts)) {
+                socialMediaPosts.forEach(post => {
+                    if (post.platform === 'twitter' && post.postUrl) {
+                        links.twitter = post.postUrl;
+                    } else if (post.platform === 'linkedin' && post.postUrl) {
+                        links.linkedin = post.postUrl;
+                    }
+                });
+            }
+            return links;
+        }
+
+        async function testHealth() {
+            const statusEl = document.getElementById('health-status');
+            statusEl.innerHTML = '<span class="status-badge loading">Checking...</span>';
+            
+            const result = await makeRequest('GET', '/api/health');
+            
+            if (result.ok) {
+                statusEl.innerHTML = '<span class="status-badge status-ok">✓ OK</span>';
+            } else {
+                statusEl.innerHTML = '<span class="status-badge status-error">✗ Error</span>';
+            }
+            
+            showResponse('health-response', result);
+        }
+
+        async function testGetPosts() {
+            showResponse('posts-response', { ok: true, data: { loading: true } });
+            const result = await makeRequest('GET', '/api/posts');
+            // Format posts to show social links if available
+            if (result.ok && Array.isArray(result.data)) {
+                result.data = result.data.map(post => {
+                    if (post.socialMediaPosts && post.socialMediaPosts.length > 0) {
+                        post.socialMediaLinks = extractSocialLinks(post.socialMediaPosts);
+                    }
+                    return post;
+                });
+            }
+            showResponse('posts-response', result);
+        }
+
+        async function testCreatePost() {
+            showResponse('create-post-response', { ok: true, data: { loading: true } });
+            const result = await makeRequest('POST', '/api/posts/create');
+            showResponse('create-post-response', result, true); // Show social links
+        }
+
+        async function testGetHotels() {
+            showResponse('hotels-response', { ok: true, data: { loading: true } });
+            const result = await makeRequest('GET', '/api/hotels');
+            showResponse('hotels-response', result);
+        }
+
+        async function testScrapeHotel() {
+            const url = document.getElementById('hotel-url').value;
+            if (!url) {
+                alert('Please enter a hotel URL');
+                return;
+            }
+            
+            showResponse('scrape-response', { ok: true, data: { loading: true } });
+            const result = await makeRequest('POST', '/api/hotels/scrape', { url });
+            showResponse('scrape-response', result);
+        }
+
+        async function testChat() {
+            const message = document.getElementById('chat-message').value;
+            if (!message) {
+                alert('Please enter a message');
+                return;
+            }
+            
+            showResponse('chat-response', { ok: true, data: { loading: true } });
+            const result = await makeRequest('POST', '/api/chat', { message });
+            showResponse('chat-response', result);
+        }
+
+        async function testRecommendations() {
+            showResponse('recommendations-response', { ok: true, data: { loading: true } });
+            const result = await makeRequest('GET', '/api/chat/recommendations');
+            showResponse('recommendations-response', result);
+        }
+
+        async function testGetSocialMedia() {
+            const postId = document.getElementById('post-id').value;
+            if (!postId) {
+                alert('Please enter a post ID');
+                return;
+            }
+            
+            showResponse('social-media-response', { ok: true, data: { loading: true } });
+            const result = await makeRequest('GET', `/api/posts/${postId}/social-media`);
+            showResponse('social-media-response', result, true); // Show social links
+        }
+
+        // Auto-check health on load
+        window.onload = () => {
+            testHealth();
+        };
+    </script>
+</body>
+</html>
+
