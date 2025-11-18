@@ -1,6 +1,6 @@
 # 🏨 AI Agent Backend - Hotel Content Generator
 
-Selamat datang! Ini adalah sistem AI agent yang otomatis mengumpulkan data hotel, membuat konten menarik, dan mempublish ke social media setiap 2 jam. Semuanya berjalan otomatis tanpa perlu campur tangan manual! 🚀
+Ini adalah sistem AI agent yang otomatis mengumpulkan data hotel, membuat konten menarik, dan mempublish ke social media setiap 2 jam. Semuanya berjalan otomatis tanpa perlu campur tangan manual! 🚀
 
 ## ✨ Apa yang Bisa Dilakukan?
 
@@ -262,8 +262,8 @@ Untuk production:
 
 ## 📝 License
 
-ISC
+Do not use for commercial, this is the test only
 
 ---
 
-**Selamat menggunakan! Jika ada pertanyaan, jangan ragu untuk bertanya! 😊**
+
