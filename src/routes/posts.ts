@@ -1,4 +1,5 @@
 import type { Express } from 'express';
+import { z } from 'zod';
 import { PostService } from '../services/postService.js';
 import { HotelService } from '../services/hotelService.js';
 import { SocialMediaService } from '../services/socialMediaService.js';
@@ -70,10 +71,12 @@ export function registerPostRoutes(app: Express) {
   // Scrape a hotel
   app.post('/api/hotels/scrape', async (req, res) => {
     try {
-      const { url } = req.body;
-      if (!url) {
-        return res.status(400).json({ error: 'URL is required' });
+      const bodySchema = z.object({ url: z.string().url() });
+      const parseResult = bodySchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: 'Invalid request body', details: parseResult.error.flatten() });
       }
+      const { url } = parseResult.data;
 
       const hotel = await hotelService.scrapeAndSaveHotel(url);
       res.json(hotel);

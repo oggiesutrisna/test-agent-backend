@@ -1,4 +1,5 @@
 import type { Express } from 'express';
+import { z } from 'zod';
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
@@ -40,11 +41,15 @@ export function registerChatbotRoutes(app: Express) {
   // Enhanced chatbot endpoint
   app.post('/api/chat', async (req, res) => {
     try {
-      const { message, conversationId } = req.body;
-      
-      if (!message) {
-        return res.status(400).json({ error: 'Message is required' });
+      const bodySchema = z.object({
+        message: z.string().min(1).max(1000),
+        conversationId: z.string().optional(),
+      });
+      const parseResult = bodySchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: 'Invalid request body', details: parseResult.error.flatten() });
       }
+      const { message, conversationId } = parseResult.data;
 
       let response: string;
 
@@ -72,7 +77,15 @@ export function registerChatbotRoutes(app: Express) {
   // Get hotel recommendations
   app.get('/api/chat/recommendations', async (req, res) => {
     try {
-      const { location, limit = 5 } = req.query;
+      const querySchema = z.object({
+        location: z.string().optional(),
+        limit: z.coerce.number().int().min(1).max(50).optional(),
+      });
+      const parseResult = querySchema.safeParse(req.query);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: 'Invalid query params', details: parseResult.error.flatten() });
+      }
+      const { location, limit = 5 } = parseResult.data;
       
       const hotels = await hotelService.getAllHotels();
       
@@ -84,7 +97,7 @@ export function registerChatbotRoutes(app: Express) {
       }
 
       const recommendations = filteredHotels
-        .slice(0, Number(limit))
+        .slice(0, limit)
         .map(h => ({
           id: h.id,
           name: h.name,
